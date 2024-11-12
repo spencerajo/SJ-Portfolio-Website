@@ -1,0 +1,101 @@
+<html>
+    <style>
+        .id-field { position: relative; right: -1px; }
+        .name-field { position: relative; right: -7px; }
+        .email-field { position: relative; right: -7px; }
+        .role-field { position: relative; right: -15px; }
+        .bio-field { position: relative; right: -22px; }
+    </style>
+
+    <body>
+        <h1>This is the Users Page!</h1> 
+        <h2>This page is connected to a database!</h2>
+        <b>Fill out the below form to add a user:</b><br><br>
+
+        <form id="userForm">
+            <label for="id">ID No.:</label>
+            <input id="id" class="id-field" type="number" size="50">
+            <br><br>
+
+            <label for="name">Name:</label>
+            <input id="name" class="name-field" type="text" size="50">
+            <br><br>
+
+            <label for="email">Email:</label>
+            <input id="email" class="email-field" type="text" size="50">
+            <br><br>
+
+            <label for="role">Role:</label>
+            <input id="role" class="role-field" type="text" size="50">
+            <br><br>
+
+            <label for="bio">Bio:</label>
+            <input id="bio" class="bio-field" type="text" size="50">
+            <br><br>
+
+            <!--!The Submit button calls the 'submitUserForm()' function upon the button being pressed.-->
+            <button type="button" onclick="submitUserForm()">Submit</button>
+        </form>
+
+        <br>
+        <b>Current Users:</b>
+        <div id="userDisplay"></div>
+        <br>
+    </body>
+
+    <script>
+        function submitUserForm() {
+            //Get form element from HTML
+            const form = document.getElementById("userForm");
+
+            //Set a JSON body called 'userFormData' to hold all data that was input into HTML inputs
+            const userFormData = {
+                id: form.id.value,
+                name: form.name.value,
+                email: form.email.value,
+                role: form.role.value,
+                bio: form.bio.value
+            };
+
+            console.log("The following data was submitted: ", userFormData);
+            
+            //Create a response after data is submitted to the server
+            fetch('/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userFormData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("User added successfully:", data);
+                getUserFormData(); //Refresh the user list
+            })
+            .catch(error => console.error("Error adding user:", error));
+        }
+
+        function getUserFormData() {
+            //Fetch the data from the database server
+            fetch('/users')
+                .then(response => response.json())
+                .then(users => {
+                    //Create a variable to be the section that the users are placed into
+                    const displaySection = document.getElementById("userDisplay");
+
+                    //Clear existing database data (replace it with "")
+                    displaySection.innerHTML = "";
+
+                    //Loop through each user and add them to the display section
+                    users.forEach(user => {
+                        const userInfo = document.createElement("p"); //Create a 'p' element to hold each records' data
+                        userInfo.textContent = `ID: ${user.id}, Name: ${user.name}, Email: ${user.email}, Role: ${user.role}, Bio: ${user.bio}`;
+                        displaySection.appendChild(userInfo);
+                    });
+                });
+        }
+
+        //Load user data on page load
+        window.onload = getUserFormData; 
+    </script>
+</html>
